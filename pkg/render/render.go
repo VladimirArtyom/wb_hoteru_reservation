@@ -8,6 +8,7 @@ import (
 	"path/filepath"
 
 	"github.com/VladimirArtyom/wb_hoteru_reservation/pkg/config"
+	"github.com/VladimirArtyom/wb_hoteru_reservation/pkg/models"
 )
 
 var app *config.AppConfig
@@ -16,7 +17,7 @@ func NewTemplate(app_param *config.AppConfig) {
 	app = app_param
 }
 
-func RenderTemplate(w http.ResponseWriter, targetTmpl string) {
+func RenderTemplate(w http.ResponseWriter, targetTmpl string, data *models.TemplateData) {
 	// creer un nouveau TC
 	var monCache map[string]*template.Template
 	if app.UseCache {
@@ -34,13 +35,12 @@ func RenderTemplate(w http.ResponseWriter, targetTmpl string) {
 	}
 	// Avant d'executer le template, tu as besoin de l'executer dans un buffer
 	buffer := new(bytes.Buffer)
-	err := tmpl.Execute(buffer, nil)
+	err := tmpl.Execute(buffer, &data)
 	if err != nil {
 		log.Fatal(err)
 	}
 	
 	buffer.WriteTo(w)
-
 }
 
 

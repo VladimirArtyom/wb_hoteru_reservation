@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/VladimirArtyom/wb_hoteru_reservation/pkg/config"
+	"github.com/VladimirArtyom/wb_hoteru_reservation/pkg/models"
 	"github.com/VladimirArtyom/wb_hoteru_reservation/pkg/render"
 )
 
@@ -25,10 +26,17 @@ func NewHandlers(r *Repository) {
 
 
 func (m *Repository) Home(w http.ResponseWriter, r *http.Request) {
-	render.RenderTemplate(w, "home.page.html")
+	render.RenderTemplate(w, "home.page.html", &models.TemplateData{})
 }
 
 func (m *Repository) About(w http.ResponseWriter, r *http.Request) {
+	
+	stringMapData := map[string]string{
+		"test": "Wei wou wehuoi",
+		"jamet": "kuproy jamet",
+	}
 
-	render.RenderTemplate(w, "about.page.html")
+	render.RenderTemplate(w, "about.page.html", &models.TemplateData{
+		StringMap: stringMapData,
+	})
 }

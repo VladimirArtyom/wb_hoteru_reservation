@@ -6,7 +6,6 @@ import (
 	"github.com/justinas/nosurf"
 )
 
-
 func NoSurf(next http.Handler) http.Handler{
 	csrfHandler := nosurf.New(next)
 	
@@ -19,4 +18,8 @@ func NoSurf(next http.Handler) http.Handler{
 
 	csrfHandler.SetBaseCookie(cookie)
 	return csrfHandler
+}
+
+func SessionLoad(next http.Handler) http.Handler {
+	return appConfig.Session.LoadAndSave(next)
 }

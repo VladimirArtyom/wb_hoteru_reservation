@@ -11,12 +11,12 @@ import (
 var Repo *Repository;
 
 type Repository struct {
-	app *config.AppConfig
+	App *config.AppConfig
 } 
 
 func NewRepository(app *config.AppConfig) *Repository {
 	return &Repository{
-		app: app,
+		App: app,
 	}
 }
 
@@ -26,17 +26,29 @@ func NewHandlers(r *Repository) {
 
 
 func (m *Repository) Home(w http.ResponseWriter, r *http.Request) {
+
+	var ipAddr string = r.RemoteAddr
+	
+	// Save to the current session context
+	m.App.Session.Put(r.Context(), "remote_ip", ipAddr)
+
+
 	render.RenderTemplate(w, "home.page.html", &models.TemplateData{})
 }
 
 func (m *Repository) About(w http.ResponseWriter, r *http.Request) {
 	
-	stringMapData := map[string]string{
+	stringMapData := map[string]interface{}{
 		"test": "Wei wou wehuoi",
 		"jamet": "kuproy jamet",
 	}
 
+	// Read the current session context
+	ipAddr :=  m.App.Session.GetString(r.Context(), "remote_ip")
+
+	stringMapData["remote_ip"] = ipAddr
+
 	render.RenderTemplate(w, "about.page.html", &models.TemplateData{
-		StringMap: stringMapData,
+		AutreData: stringMapData,
 	})
 }

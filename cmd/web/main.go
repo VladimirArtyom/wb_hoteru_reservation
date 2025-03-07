@@ -4,42 +4,51 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"time"
 
 	"github.com/VladimirArtyom/wb_hoteru_reservation/pkg/config"
 	"github.com/VladimirArtyom/wb_hoteru_reservation/pkg/handlers"
 	"github.com/VladimirArtyom/wb_hoteru_reservation/pkg/render"
-	"github.com/go-chi/chi"
-	"github.com/go-chi/chi/middleware"
+	"github.com/alexedwards/scs/v2"
 )
 
 const portNumber string = ":8080"
+var appConfig config.AppConfig = config.AppConfig{
+	UseCache: false,
+}
+var session *scs.SessionManager
+
+
+func setSession(ses *scs.SessionManager) *scs.SessionManager {
+	ses.Lifetime = 24 * time.Hour
+	ses.Cookie.Secure = false
+	ses.Cookie.SameSite = http.SameSiteLaxMode
+	ses.Cookie.Persist = true
+	return ses
+}
 
 func main() {
 
-	var appConfig config.AppConfig = config.AppConfig{
-		UseCache: false,
-	}
+	session = scs.New()
+	session = setSession(session)
+	// Put session into the appConfig to make it available in another package
+
 	render.NewTemplate(&appConfig)
 	tc, err := render.CreateTemplateCache()
 	if err != nil  {
-		log.Panic("Could not create template Cache")
+		log.Panic("Could not create template Cache", err)
 	}
 	
 	appConfig.TemplateCache = tc
+	appConfig.Session = session
+
+	// set the handlers repostiory
+	repo := handlers.NewRepository(&appConfig)
+	handlers.NewHandlers(repo)
+	render.NewTemplate(&appConfig)
 
 	// handlers
-	mux := chi.NewMux()
-
-	mux.Use(middleware.Recoverer)
-	mux.Use(NoSurf)
-
-	mux.Get("/", handlers.Repo.Home)
-	mux.Get("/about", handlers.Repo.About)
-
-	
 	fmt.Println("Starting application on port", portNumber)
-	http.ListenAndServe(portNumber, mux)
-	
-	
+	http.ListenAndServe(portNumber, routes(&appConfig))
 
 }

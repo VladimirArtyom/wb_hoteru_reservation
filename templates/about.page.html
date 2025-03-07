@@ -1,5 +1,13 @@
 {{template "base" .}}
 {{define "content"}}
     <h1>This is about page</h1>
-    <p>This is message from the Template Data: {{index .StringMap "jamet"}}</p>
+<p>
+
+{{if ne (index .AutreData "remote_ip") ""}}
+    This is message from the Template Data: {{index .AutreData "remote_ip"}}
+{{else}}
+    I don;t know what your ip address is; Please refer to <a href="/">ほむぱげ</a>
+{{end}}
+</p>    
+
 {{end}}
